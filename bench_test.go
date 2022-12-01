@@ -1,11 +1,13 @@
 package benchcompress
 
 import (
+	"bytes"
 	"crypto/rand"
 	"fmt"
 	"testing"
 
 	"github.com/DataDog/zstd"
+	kzstd "github.com/klauspost/compress/zstd"
 	"github.com/pierrec/lz4/v4"
 )
 
@@ -59,6 +61,45 @@ func BenchmarkDatadogZstdCompress(b *testing.B) {
 	for i := 128; i < 65536; i *= 2 {
 		b.Run(fmt.Sprintf("%d", i), func(b *testing.B) {
 			benchmarkDatadogZstdCompress(b, i)
+		})
+	}
+}
+
+func benchmarkKlauspostZstdCompress(b *testing.B, size int) {
+	data := make([]byte, size)
+	_, err := rand.Read(data)
+	if err != nil {
+		panic(err)
+	}
+	buf := new(bytes.Buffer)
+	buf.Grow(size * 2)
+	w, err := kzstd.NewWriter(buf)
+	if err != nil {
+		b.Fatal(err)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buf.Reset()
+		_, err = w.Write(data)
+		if err != nil {
+			b.Fatal(err)
+		}
+		if err := w.Flush(); err != nil {
+			b.Fatal(err)
+		}
+		if buf.Len() == 0 {
+			b.Fatal()
+		}
+		if err := w.Close(); err != nil {
+			b.Fatal(err)
+		}
+	}
+}
+
+func BenchmarkKlauspostZstdCompress(b *testing.B) {
+	for i := 128; i < 65536; i *= 2 {
+		b.Run(fmt.Sprintf("%d", i), func(b *testing.B) {
+			benchmarkKlauspostZstdCompress(b, i)
 		})
 	}
 }
