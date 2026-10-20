@@ -1,9 +1,9 @@
 module github.com/reusee/benchcompress
 
-go 1.20
+go 1.24
 
 require (
-	github.com/DataDog/zstd v1.5.2 // indirect
-	github.com/klauspost/compress v1.15.12 // indirect
-	github.com/pierrec/lz4/v4 v4.1.17 // indirect
+	github.com/DataDog/zstd v1.5.2
+	github.com/klauspost/compress v1.18.7
+	github.com/pierrec/lz4/v4 v4.1.17
 )
